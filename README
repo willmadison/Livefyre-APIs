@@ -1,1 +1,14 @@
 Livefyre API Libraries and Documentation
+
+All examples assume something like the following:
+    $DOMIAN = '___.fyre.co';
+    $KEY = 'your Livefyre secret key';
+
+Generating a user token:
+    <?php
+    include('Livefyre.php');
+
+    // Let's say we want to generate a token for uid '_u1'
+    $domain = new \Livefyre\Domain($DOMAIN, $KEY)
+    $token = $domain.user('_u1').token();
+    ?>
