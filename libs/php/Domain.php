@@ -2,6 +2,7 @@
 namespace Livefyre;
 
 include("User.php");
+include("Site.php");
 
 class Domain {
     private $host;
@@ -22,6 +23,10 @@ class Domain {
     
     public function user($uid) {
         return new User($uid, $this);
+    }
+    
+    public function site($site_id) {
+        return new Site($site_id, $this);
     }
 }
 
