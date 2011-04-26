@@ -12,3 +12,9 @@ Generating a user token:
     $domain = new \Livefyre\Domain($DOMAIN, $KEY)
     $token = $domain.user('_u1').token();
     ?>
+    
+Getting show_partial:
+    <?php
+    $conv = $domain->site('339')->article('6113')->conversation();
+    $html = $conv->to_html();
+    ?>
