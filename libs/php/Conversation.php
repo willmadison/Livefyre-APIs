@@ -14,7 +14,8 @@ class Conversation {
         assert('$this->article != null /* Article is necessary to get HTML */');
         $site_id = $this->article->get_site()->get_id();
         $article_id = $this->article->get_id();
-        return file_get_contents("http://bootstrap.livefyre.com/bootstrap/fyres/show_partial/0/$site_id/$article_id/");
+        $domain = $this->article->get_site()->get_domain()->get_host();
+        return file_get_contents("http://bootstrap.$domain/bootstrap/site/$site_id/article/$article_id/conversation?format=html");
     }
 }
 

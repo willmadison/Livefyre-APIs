@@ -16,6 +16,10 @@ class Site {
         return new Article($article_id, $this);
     }
     
+    public function get_domain() {
+        return $this->domain;
+    }
+    
     public function get_id() {
         return $this->id;
     }
