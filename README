@@ -10,7 +10,7 @@ Generating a user token:
 
     // Let's say we want to generate a token for uid '_u1'
     $domain = new \Livefyre\Domain($DOMAIN, $KEY)
-    $token = $domain.user('_u1').token();
+    $token = $domain->user('_u1')->token();
     ?>
     
 Getting show_partial:
