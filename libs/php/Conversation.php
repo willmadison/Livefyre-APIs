@@ -15,7 +15,7 @@ class Conversation {
         $site_id = $this->article->get_site()->get_id();
         $article_id = $this->article->get_id();
         $domain = $this->article->get_site()->get_domain()->get_host();
-        return file_get_contents("http://bootstrap.$domain/bootstrap/site/$site_id/article/$article_id/conversation?format=html");
+        return file_get_contents("http://bootstrap.$domain/api/v1.1/public/bootstrap/html/$site_id/".base64_encode($article_id).".html");
     }
 }
 
