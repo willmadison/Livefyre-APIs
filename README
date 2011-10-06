@@ -1,7 +1,7 @@
 Livefyre API Libraries and Documentation
 
 All examples assume something like the following:
-    $DOMIAN = '___.fyre.co';
+    $DOMAIN = '___.fyre.co';
     $KEY = 'your Livefyre secret key';
 
 Generating a user token:
