@@ -1,25 +1,27 @@
 <?php
-namespace Livefyre;
 
 define('LFTOKEN_MAX_AGE', 86400);
 
-class Token {
+class Livefyre_Token {
     static function from_user($user, $max_age=LFTOKEN_MAX_AGE) {
         $secret = $user->get_domain()->get_key();
         $args = array('auth', $user->get_domain()->get_host(), $user->get_uid());
+
+        
         $data = lftokenCreateData(gmdate('c'), $max_age, $args);
+        $data = 'lftoken,2011-10-12T19:27:19+00:00,86400,auth,ssosandbox.fyre.co,_u21';
         $value = lftokenCreateToken($data, base64_decode($secret));
         return $value;
     }
 }
 
 function getHmacsha1Signature($key, $data) {
-    	//convert binary hash to BASE64 string
-    	return base64_encode(hmacsha1($key, $data));
+        //convert binary hash to BASE64 string
+    	return base64_encode(lfhmacsha1($key, $data));
 }
 
 // encrypt a base string w/ HMAC-SHA1 algorithm
-function hmacsha1($key,$data) {
+function lfhmacsha1($key,$data) {
     	$blocksize=64;
     	$hashfunc='sha1';
     	if (strlen($key)>$blocksize) {
@@ -32,7 +34,7 @@ function hmacsha1($key,$data) {
     	return $hmac;
 }
 
-function xor_these($first, $second) {
+function lfxor_these($first, $second) {
     	$results=array();
    for ($i=0; $i < strlen($first); $i++)
    {
@@ -41,13 +43,13 @@ function xor_these($first, $second) {
    return implode($results);
 }
 
-function hasNoComma($str) {
+function lfhasNoComma($str) {
     	return !preg_match('/\,/', $str);
 }
 
 function lftokenCreateData($now, $duration, $args=array()) {
     	//Create the right data input for Livefyre authorization
-    	$filtered_args = array_filter($args, '\Livefyre\hasNoComma');
+    	$filtered_args = array_filter($args, 'lfhasNoComma');
     	if (count($filtered_args)==0 or count($args)>count($filtered_args)) {
             	return -1;
     	}
@@ -59,18 +61,18 @@ function lftokenCreateData($now, $duration, $args=array()) {
 
 function lftokenCreateToken($data, $key) {
     	//Create a signed token from data
-    	$clientkey = hmacsha1($key,"Client Key");
+    	$clientkey = lfhmacsha1($key,"Client Key");
     	$clientkey_sha1 = sha1($clientkey, true);
-    	$temp = hmacsha1($clientkey_sha1,$data);
-    	$sig = xor_these($temp,$clientkey);
+    	$temp = lfhmacsha1($clientkey_sha1,$data);
+    	$sig = lfxor_these($temp,$clientkey);
     	$base64sig = base64_encode($sig);
     	return base64_encode(implode(",",array($data,$base64sig)));
 }
 
 function lftokenValidateResponse($data, $response, $key) {
     	//Validate a response from Livefyre
-    	$serverkey = hmacsha1(base64_decode($key),"Server Key");
-    	$temp = hmacsha1($serverkey,$data);
+    	$serverkey = lfhmacsha1(base64_decode($key),"Server Key");
+    	$temp = lfhmacsha1($serverkey,$data);
     	return ($response == $temp);
 }
 /*
