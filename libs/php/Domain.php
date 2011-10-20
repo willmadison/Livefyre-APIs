@@ -1,12 +1,12 @@
 <?php
-namespace Livefyre;
 
 include("User.php");
 include("Site.php");
 
-class Domain {
+class Livefyre_Domain {
     private $host;
     private $key;
+    public $user;
     
     public function __construct($host, $key=null) {
         $this->host = $host;
@@ -22,11 +22,11 @@ class Domain {
     }
     
     public function user($uid) {
-        return new User($uid, $this);
+        $this->user = new Livefyre_User($uid, $this);
     }
     
     public function site($site_id) {
-        return new Site($site_id, $this);
+        return new Livefyre_Site($site_id, $this);
     }
 }
 
