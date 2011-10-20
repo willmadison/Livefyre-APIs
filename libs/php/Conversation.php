@@ -1,7 +1,6 @@
 <?php
-namespace Livefyre;
 
-class Conversation {
+class Livefyre_Conversation {
     private $id;
     private $article;
     
