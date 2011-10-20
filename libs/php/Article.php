@@ -1,9 +1,8 @@
 <?php
-namespace Livefyre;
 
 include("Conversation.php");
 
-class Article {
+class Livefyre_Article {
     private $id;
     private $site;
     
@@ -21,7 +20,7 @@ class Article {
     }
     
     public function conversation() {
-        return new Conversation(null, $this);
+        return new Livefyre_Conversation(null, $this);
     }
 }
 
