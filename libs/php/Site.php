@@ -1,9 +1,8 @@
 <?php
-namespace Livefyre;
 
 include('Article.php');
 
-class Site {
+class Livefyre_Site {
     private $id;
     private $domain;
     
@@ -13,7 +12,7 @@ class Site {
     }
     
     public function article($article_id) {
-        return new Article($article_id, $this);
+        return new Livefyre_Article($article_id, $this);
     }
     
     public function get_domain() {
