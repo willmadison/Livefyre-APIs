@@ -29,29 +29,6 @@ class Livefyre_User {
         return $this->token;
     }
 
-    public function pull( ) {
-        $token_base64 = base64_encode( $this->get_token() );
-        $domain = $this->get_domain( )->get_host();
-        $uid = $this->get_uid();
-        $pull_profile_url = "http://" . $domain . "/users/get_remote_profile?id=" . $uid;
-        $pull_profile_url_urlencoded = urlencode( $pull_profile_url );
-        $query_args = "/?actor_token={$token_base64}&pull_profile_url={$pull_profile_url_urlencoded}";
-        $domain = 'ssosandbox.livefyre.com';
-
-        $remote_url = "http://" . $domain . $query_args;
-
-        $remote_url = "http://ssosandbox.livefyre.com/wds/pull.php"; //TEST REMOTE URL
-
-        $ch=curl_init($remote_url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $response = curl_exec($ch);
-        curl_close($ch);
-
-        $user_data = json_decode($response);
-
-        return $user_data;
-    }
-
     public function push( $user_data ) {
         //JSON encode $userdata and create $_POST array
         $user_data_in_json_format = json_encode($user_data);
