@@ -22,7 +22,7 @@ class Livefyre_Domain {
     }
     
     public function user($uid) {
-        $this->user = new Livefyre_User($uid, $this);
+        return new Livefyre_User($uid, $this);
     }
     
     public function site($site_id) {

@@ -9,7 +9,6 @@ class Livefyre_Token {
 
         
         $data = lftokenCreateData(gmdate('c'), $max_age, $args);
-        $data = 'lftoken,2011-10-12T19:27:19+00:00,86400,auth,ssosandbox.fyre.co,_u21';
         $value = lftokenCreateToken($data, base64_decode($secret));
         return $value;
     }
