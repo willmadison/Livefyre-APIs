@@ -1,10 +1,10 @@
 <?php
-function Livefyre_validate_import_request($key, $signature, $blogID) {
-
+function Livefyre_validate_import_request( $blogID, $key, $correct_signature, $given_signature, $given_signature_time_created ) {
+	
 	if ( 	
-			( getHmacsha1Signature( base64_decode($key), $signature ) != $_POST['sig'] )
+			( $correct_signature != $given_signature )
 			|| 
-			( abs($_POST['sig_created'] - time()) > 259200 )
+			( abs($given_signature_time_created - time()) > 259200 )
 	) {
 
 		return 'sig-failure';
