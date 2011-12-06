@@ -2,6 +2,7 @@
 
 include("User.php");
 include("Site.php");
+include("Import.php");
 
 class Livefyre_Domain {
     private $host;
