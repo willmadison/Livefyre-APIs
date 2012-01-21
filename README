@@ -9,12 +9,36 @@ Generating a user token:
     include('Livefyre.php');
 
     // Let's say we want to generate a token for uid '_u1'
-    $domain = new \Livefyre\Domain($DOMAIN, $KEY)
-    $token = $domain->user('_u1')->token();
+    $domain = new Livefyre_Domain($DOMAIN, $KEY)
+    $token = $domain->user('12345')->token();
     ?>
     
 Getting show_partial:
     <?php
     $conv = $domain->site('339')->article('6113')->conversation();
     $html = $conv->to_html();
+    ?>
+
+Render the User's "login" JSON blob which includes their token and display name:
+    <?php
+    //here we provide a display name only to ensure that on first login the interface can be populated
+    $user = $domain->user( '12345', 'Jorge' );
+    
+    //returns the serialized string of JSON. You can pass this directly to the JavaScript method LF.login()
+    $lf_init_json = $user->auth_json( );
+    ?>
+
+Render the widget and provide it with a given User's auth credentials:
+    <?php
+    //here we provide a display name only to ensure that on first login the interface can be populated
+    $user = $domain->user( '12345', 'Jorge' ); 
+    
+    //pass your Livefyre site id
+    $site = $domain->site( $site_id ); 
+    
+    //pass your CMS's article id
+    $article = $site->article( $cms_unique_id );
+    
+    $conv = $article->conversation();
+    echo $conv->to_initjs( $user, 'login.php?redirect_to=' . $current_page_URL, 'logout.php?redirect_to=' . $current_page_URL );
     ?>

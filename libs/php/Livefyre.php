@@ -1,5 +1,3 @@
 <?php
-namespace Livefyre;
-
-include('Domain.php');
+include( 'Domain.php' );
 ?>
