@@ -1,3 +1,3 @@
 <?php
-include( 'Domain.php' );
+include('Domain.php');
 ?>

@@ -40,5 +40,5 @@ Render the widget and provide it with a given User's auth credentials:
     $article = $site->article( $cms_unique_id );
     
     $conv = $article->conversation();
-    echo $conv->to_initjs( $user, 'login.php?redirect_to=' . $current_page_URL, 'logout.php?redirect_to=' . $current_page_URL );
+    echo $conv->to_initjs( $user, $user->display_name );
     ?>
