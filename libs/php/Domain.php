@@ -29,7 +29,7 @@ class Livefyre_Domain {
         return new Livefyre_Site($site_id, $this);
     }
 
-    public validate_server_token($token) {
+    public function validate_server_token($token) {
         return lftokenValidateServerToken($token, $this->key);
     }
 }
