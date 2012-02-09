@@ -2,6 +2,7 @@
 
 include("User.php");
 include("Site.php");
+include("Token.php");
 
 class Livefyre_Domain {
     private $host;
@@ -27,6 +28,11 @@ class Livefyre_Domain {
     public function site($site_id) {
         return new Livefyre_Site($site_id, $this);
     }
+
+    public validate_server_token($token) {
+        return lftokenValidateServerToken($token, $this->key);
+    }
+}
 }
 
 ?>

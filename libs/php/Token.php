@@ -66,19 +66,20 @@ function lftokenCreateToken($data, $key) {
     	return base64_encode(implode(",",array($data,$base64sig)));
 }
 
-function lftokenValidateServerToken($data, $response, $key) {
-    	//Validate a response from Livefyre
-    	$serverkey = hmacsha1(base64_decode($key),"Server Key");
-    	$temp = base64_encode(hmacsha1($serverkey,$data));
-        $parts = explode(',', $data);
-        $timestamp = $parts[1];
-        $duration = $parts[2];
-    	return ( $response == $temp ) && ( time() - strtotime( $timestamp ) < $duration );
+function lftokenValidateServerToken($token, $key) {
+	$parts = explode( ',', $server_token );
+	$signature = array_pop( $parts );
+	$serverkey = hmacsha1( base64_decode( $key ), "Server Key" );
+	$temp = base64_encode( hmacsha1( $serverkey, implode( ',', $parts ) ) );
+    $timestamp = $parts[1];
+    $duration = $parts[2];
+	return ( $signature == $temp ) && ( time() - strtotime( $timestamp ) < $duration );
 }
 
 function lftokenValidateResponse($data, $response, $key) {
-	//This was a poorly chosen name, deprecated but here for backcompat
-	return lftokenValidateServerToken($data, $response, $key);
+	// This was a poorly chosen name, not a great interface.
+	// Deprecated but here for backcompat
+	return lftokenValidateServerToken($data . ',' . $response, $key);
 }
 
 /*
