@@ -2,7 +2,6 @@
 
 include("User.php");
 include("Site.php");
-include("Token.php");
 
 class Livefyre_Domain {
     private $host;
