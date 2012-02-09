@@ -66,7 +66,7 @@ function lftokenCreateToken($data, $key) {
     	return base64_encode(implode(",",array($data,$base64sig)));
 }
 
-function lftokenValidateResponse($data, $response, $key) {
+function lftokenValidateServerToken($data, $response, $key) {
     	//Validate a response from Livefyre
     	$serverkey = hmacsha1(base64_decode($key),"Server Key");
     	$temp = base64_encode(hmacsha1($serverkey,$data));
@@ -75,6 +75,12 @@ function lftokenValidateResponse($data, $response, $key) {
         $duration = $parts[2];
     	return ( $response == $temp ) && ( time() - strtotime( $timestamp ) < $duration );
 }
+
+function lftokenValidateResponse($data, $response, $key) {
+	//This was a poorly chosen name, deprecated but here for backcompat
+	return lftokenValidateServerToken($data, $response, $key);
+}
+
 /*
 //Generate a token:
 $secret= 'Enter your secret key here';
