@@ -33,6 +33,5 @@ class Livefyre_Domain {
         return lftokenValidateServerToken($token, $this->key);
     }
 }
-}
 
 ?>
