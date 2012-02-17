@@ -1,6 +1,8 @@
 <?php
 
-define('LFTOKEN_MAX_AGE', 86400);
+include('JWT.php');
+
+define('TOKEN_EXPIRATION', time() + 86400);
 
 class Livefyre_Token {
     static function from_user($user, $max_age=LFTOKEN_MAX_AGE) {
@@ -88,4 +90,12 @@ $args=array('auth', 'Enter your fyre.co domain name here (eg yourdomain.fyre.co)
 $data=lftokenCreateData(gmdate('c'), 86400, $args);
 $value= lftokenCreateToken($data,base64_decode($secret));
 */
+class Token {
+    static function from_user($user, $token_expiration=TOKEN_EXPIRATION) {
+        $key = $user->get_domain()->get_key();
+        $token = array('domain'=>$user->get_domain()->get_host(), 'user_id'=>$user->get_uid(), 'expires'=>$token_expiration);
+        return JWT.decode($token, $key);
+    }
+}
+
 ?>
