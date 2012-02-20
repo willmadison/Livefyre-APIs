@@ -2,16 +2,28 @@
 
 include("User.php");
 include("Site.php");
+//include("Http.php");
 
 class Livefyre_Domain {
     private $host;
     private $key;
     
-    public function __construct($host, $key=null) {
+    public function __construct($host, $key=null, $http_api=null) {
         $this->host = $host;
         $this->key = $key;
+        if ($http_api != null) {
+            $this->http_api = $http_api;
+        } else {
+            //or i can include it here
+            echo "instantiatesssss lf http<br>";
+            include_once("Http.php");
+            $this->http_api = new Livefyre_http;  
+        }
     }
-    
+    public function get_http() {
+        return $this->http_api;
+    }
+
     public function get_host() {
         return $this->host;
     }
