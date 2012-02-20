@@ -3,19 +3,19 @@
 class Livefyre_http {
 
     public function __construct() {
-        echo "Constructor for HTTP\n";
+ //       echo "Constructor for HTTP\n";
     }
 
     public function request($url, $args = array()) {
-        echo "request";
+   //     echo "request";
         //return $url;
         $ch=curl_init($url);
         return $ch;
     }
 
     public function post($url, $args = array()) {
-        echo "<br>POSTPOSTPOST<br>";
-
+     //   echo "<br>POSTPOSTPOST<br>";
+	//FB::log('Log message');
         #$ch = $this->request($url);
         $ch = curl_init($url);
         $post_data = array( 'data' => json_encode( $args ) );
@@ -29,13 +29,13 @@ class Livefyre_http {
         $response = curl_exec($ch);
         $info = curl_getinfo($ch);
         curl_close($ch);
-        echo "<br>RESPONSE:<br>";
-        echo "$info['total_time']";
+        //echo "<br>RESPONSE:<br>";
+       // echo "$info['total_time']";
         return $response;
     }
 
     public function get($url, $args = array()) {
-        echo "get\n";
+        //echo "get\n";
 
         #$ch = $this->request($url);
         $ch = curl_init($url);
