@@ -15,7 +15,6 @@ class Livefyre_Domain {
             $this->http_api = $http_api;
         } else {
             //or i can include it here
-            echo "instantiatesssss lf http<br>";
             include_once("Http.php");
             $this->http_api = new Livefyre_http;  
         }
