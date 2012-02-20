@@ -22,7 +22,12 @@ class Livefyre_Conversation {
             $add_backplane = '';
         }
         if ( $user ) {
-            $login_json = array( 'token' => $user->token( ), 'display_name' => $display_name );
+            $login_json = array( 
+                'token' => $user->token( ), 
+                'profile' => array( 
+                    'display_name' => $display_name
+                )
+            );
             $login_json_str = json_encode( $login_json );
             $login_js = "LF.ready( function() {LF.login($login_json_str);} );";
         } else {
