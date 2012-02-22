@@ -18,11 +18,11 @@ class Livefyre_Conversation {
     public function render_js_delegates( ) {
         $str_out = '';
         if ( $this->delegates ) {
-            $str_out = 'var livefyreConvDelegates = {\n';
+            $str_out = "var livefyreConvDelegates = {\n";
             foreach ($this->delegates as $handler => $code) {
                 $str_out .= "    handle_$handler: " . $code . ", \n";
             }
-            $str_out .= '}\nLF.ready( function() { LF.Dispatcher.addListener(livefyreConvDelegates); } )';
+            $str_out .= "}\nLF.ready( function() { LF.Dispatcher.addListener(livefyreConvDelegates); } )";
         }
         return $str_out;
     }
