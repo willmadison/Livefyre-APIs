@@ -3,13 +3,32 @@
 class Livefyre_Conversation {
     private $id;
     private $article;
+    private $delegates;
     
     public function __construct( $conv_id = null, $article = null ) {
         $this->id = $conv_id;
         $this->article = $article;
+        $this->delegates = array();
+    }
+    
+    public function add_js_delegate( $delegate_name, $code ) {
+        $this->delegates[ $delegate_name ] = $code;
+    }
+    
+    public function render_js_delegates( ) {
+        $str_out = '';
+        if ( $this->delegates ) {
+            $str_out = 'var livefyreConvDelegates = {\n';
+            foreach ($this->delegates as $handler => $code) {
+                $str_out .= "    handle_$handler: " . $code . ", \n";
+            }
+            $str_out .= '}\nLF.ready( function() { LF.Dispatcher.addListener(livefyreConvDelegates); } )';
+        }
+        return $str_out;
     }
 
     public function to_initjs( $user = null, $display_name = null, $backplane = false ) {
+        // When called, this will render all delegates added thru add_js_delegate
         $domainname = $this->article->get_site()->get_domain()->get_host();
         $config = array(
             'domain' => $domainname,
@@ -21,12 +40,11 @@ class Livefyre_Conversation {
         } else {
             $add_backplane = '';
         }
+        $login_js = '';
         if ( $user ) {
             $login_json = array( 'token' => $user->token( ), 'profile' => array('display_name' => $display_name) );
             $login_json_str = json_encode( $login_json );
             $login_js = "LF.ready( function() {LF.login($login_json_str);} );";
-        } else {
-            $login_js = '';
         }
         return '<script type="text/javascript" src="http://zor.' . $domainname . '/wjs/v1.0/javascripts/livefyre_init.js"></script>
         <script type="text/javascript">
@@ -34,6 +52,7 @@ class Livefyre_Conversation {
             ' . $add_backplane . '
             var conv = LF(lf_config);
             ' . $login_js . '
+            ' . $this->render_js_delegates() . '
         </script>';
     }
 
