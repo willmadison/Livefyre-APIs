@@ -1,5 +1,11 @@
 <?php
 
+if ( !defined( 'LF_DEFAULT_TLD' ) ) {
+    define( 'LF_DEFAULT_TLD', 'livefyre.com' );
+}
+if ( !defined( 'LF_DEFAULT_TLD' ) ) {
+    define( 'LF_DEFAULT_PROFILE_DOMAIN', 'livefyre.com' );
+}
 include("User.php");
 include("Site.php");
 
