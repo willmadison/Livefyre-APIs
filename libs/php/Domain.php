@@ -20,8 +20,8 @@ class Livefyre_Domain {
         return $this->key;
     }
     
-    public function user($uid) {
-        return new Livefyre_User($uid, $this);
+    public function user($uid, $display_name = null) {
+        return new Livefyre_User($uid, $this, $display_name);
     }
     
     public function site($site_id) {

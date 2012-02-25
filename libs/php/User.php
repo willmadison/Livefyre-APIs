@@ -6,9 +6,10 @@ class Livefyre_User {
     private $uid;
     private $domain;
     
-    public function __construct($uid, $domain) {
+    public function __construct($uid, $domain, $display_name = null) {
         $this->uid = $uid;
         $this->domain = $domain;
+        $this->display_name = $display_name;
     }
     
     public function get_uid() { return $this->uid; }
