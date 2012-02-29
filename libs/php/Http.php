@@ -3,49 +3,72 @@
 class Livefyre_http {
 
     public function __construct() {
- //       echo "Constructor for HTTP\n";
+        $this->default_content_type = 'application/x-www-form-urlencoded';
     }
 
     public function request($url, $args = array()) {
-   //     echo "request";
-        //return $url;
-        $ch=curl_init($url);
-        return $ch;
+        /* valid $args members (all optional):
+            method: HTTP method
+            data: associative array of "form" data
+        */
+        if ( !isset($args['method']) ) {
+            $args['method'] = isset($args['data']) ? 'POST' : 'GET';
+        }
+        $result = array( 'response' => false,
+                         'body' => false);
+        $method_name = $this->has_curl() ? 'curl_request' : 'gfc_request';
+        return $this->$method_name($url, $args, $result);
     }
 
-    public function post($url, $args = array()) {
-     //   echo "<br>POSTPOSTPOST<br>";
-	//FB::log('Log message');
-        #$ch = $this->request($url);
-        $ch = curl_init($url);
-        $post_data = array( 'data' => json_encode( $args ) );
-        $curl_options = array(
-            CURLOPT_POST => 1,
-            CURLOPT_POSTFIELDS        => $post_data,
-            CURLOPT_RETURNTRANSFER    => true,
-        );
+    private function has_curl() {
+        return function_exists('curl_init');
+    }
 
+    private function curl_request($url, $args = array(), &$result) {
+        $curl_options = array(
+            CURLOPT_RETURNTRANSFER  => true
+        );
+        if ( $args['method'] == 'POST' ) {
+            $curl_options[CURLOPT_POST]         = 1;
+            $curl_options[CURLOPT_POSTFIELDS]   = $args['data'];
+            $curl_options[CURLOPT_HTTPHEADER]   = array("Content-Type: $this->default_content_type");
+        }
+        $ch = curl_init($url); 
         curl_setopt_array($ch, $curl_options);
         $response = curl_exec($ch);
-        $info = curl_getinfo($ch);
-        curl_close($ch);
-        //echo "<br>RESPONSE:<br>";
-       // echo "$info['total_time']";
-        return $response;
+        $error = curl_error($ch);
+        $result['response'] = array( 'code' => curl_getinfo($ch, CURLINFO_HTTP_CODE) );
+        if ( $error == "" ) {
+            $result['body'] = $response;
+        }
+        return $result;
     }
 
-    public function get($url, $args = array()) {
-        //echo "get\n";
-
-        #$ch = $this->request($url);
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $response = $curl_exec($ch);
-        $curl_close($ch);
-        return $response;
+    private function gfc_request($url, $args = array(), &$result) {
+        if ( $args['method'] == 'POST' ) {
+            $data_url = http_build_query($args['data']);
+            $data_len = strlen($data_url);
+            $result['body'] = file_get_contents(
+                $url, false, 
+                stream_context_create(
+                    array(
+                        'http'=>array(
+                            'method'=>'POST',
+                            'header'=>"Connection: close\r\nContent-Length: $data_len\r\nContent-Type: $this->default_content_type\r\n",
+                            'content'=>$data_url
+                        )
+                    )
+                )
+            );
+        } else {
+            $result['body'] = file_get_contents($url);
+        }
+        // we don't have a resp code, so lets fake it!
+        $result_code = $result['body'] ? 200 : 500;
+        $result['response'] =  array( 'code' => $result_code );
+        return $result;
     }
 
 }
-
 
 ?>
