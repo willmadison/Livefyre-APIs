@@ -37,23 +37,16 @@ class Livefyre_User {
     }
     
     public function push( $user_data ) {
-        $user_data_in_json_format = array( 'data' => json_encode( $user_data ) );
+        $post_data = array( 'data' => json_encode( $user_data ) );
         $token_base64 = $this->token();
         $domain = $this->get_domain( );
         $remote_url = "http://{$domain->get_host()}/profiles/?actor_token={$token_base64}&id={$user_data['id']}";
-        $ch=curl_init($remote_url);
-        
-        $curl_options = array(
-            CURLOPT_POST => 1,
-            CURLOPT_POSTFIELDS        => $user_data_in_json_format,
-            CURLOPT_RETURNTRANSFER    => true,
-        );
-
-        curl_setopt_array( $ch, $curl_options );
-        $response = curl_exec( $ch );
-        curl_close( $ch );
-
-        return $response;
+        $result = $domain->http->request($remote_url, array('method' => 'POST', 'data' => $post_data));
+        if (is_array( $result ) && isset($result['response']) && $result['response']['code'] == 200) {
+            return $result['body'];
+        } else {
+            return false;
+        }
     }
 }
 

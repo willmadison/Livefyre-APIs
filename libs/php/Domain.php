@@ -16,15 +16,14 @@ class Livefyre_Domain {
     public function __construct($host, $key=null, $http_api=null) {
         $this->host = $host;
         $this->key = $key;
-        if ($http_api != null) {
-            $this->http_api = new $http_api;
+        if ( defined('LF_DEFAULT_HTTP_LIBRARY') ) {
+            error_log('using WP_Http thru extension');
+            $httplib = LF_DEFAULT_HTTP_LIBRARY;
+            $this->http = new $httplib;
         } else {
             include_once("Http.php");
-            $this->http_api = new Livefyre_http; 
+            $this->http = new Livefyre_http; 
         }
-    }
-    public function get_http() {
-        return $this->http_api;
     }
 
     public function get_host() {

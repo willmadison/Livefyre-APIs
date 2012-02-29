@@ -25,22 +25,21 @@ class Livefyre_http {
     }
 
     private function curl_request($url, $args = array(), &$result) {
-        $curl_options = array(
-            CURLOPT_RETURNTRANSFER  => true
-        );
+        $curl_options = array(CURLOPT_RETURNTRANSFER  => true);
         if ( $args['method'] == 'POST' ) {
-            $curl_options[CURLOPT_POST]         = 1;
-            $curl_options[CURLOPT_POSTFIELDS]   = $args['data'];
-            $curl_options[CURLOPT_HTTPHEADER]   = array("Content-Type: $this->default_content_type");
+            $curl_options = array(
+                CURLOPT_RETURNTRANSFER  => true,
+                CURLOPT_POST            => 1,
+                CURLOPT_POSTFIELDS      => http_build_query($args['data']),
+                CURLOPT_HTTPHEADER      => array("Content-Type: $this->default_content_type")
+            );
         }
         $ch = curl_init($url); 
         curl_setopt_array($ch, $curl_options);
         $response = curl_exec($ch);
         $error = curl_error($ch);
         $result['response'] = array( 'code' => curl_getinfo($ch, CURLINFO_HTTP_CODE) );
-        if ( $error == "" ) {
-            $result['body'] = $response;
-        }
+        $result['body'] = $response;
         return $result;
     }
 
