@@ -66,8 +66,17 @@ class Livefyre_Conversation {
         assert('$this->article != null /* Article is necessary to get HTML */');
         $site_id = $this->article->get_site()->get_id();
         $article_id = $this->article->get_id();
-        $domain = $this->article->get_site()->get_domain()->get_host();
-        return file_get_contents("http://bootstrap.$domain/api/v1.1/public/bootstrap/html/$site_id/".urlencode(base64_encode($article_id)).".html");
+        $site = $this->article->get_site();
+        $domain = $site->get_domain();
+        $dhost = $domain->get_host();
+        $article_id_b64 = urlencode(base64_encode($article_id));
+        $url = "http://bootstrap.$dhost/api/v1.1/public/bootstrap/html/$site_id/$article_id_b64.html";
+        $result = $domain->http->request($url, array('method' => 'GET'));
+        if (is_array( $result ) && isset($result['response']) && $result['response']['code'] == 200) {
+            return $result['body'];
+        } else {
+            return false;
+        }
     }
 }
 
