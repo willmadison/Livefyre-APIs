@@ -13,7 +13,7 @@ Generating a user token:
     $token = $domain->user('12345')->token();
     ?>
     
-Getting show_partial:
+In order to get SEO-boosting HTML for the conversation itself, cache this result and include it in the rendered page:
     <?php
     $conv = $domain->site('339')->article('6113')->conversation();
     $html = $conv->to_html();
