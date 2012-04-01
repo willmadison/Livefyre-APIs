@@ -17,7 +17,6 @@ class Livefyre_Domain {
         $this->host = $host;
         $this->key = $key;
         if ( defined('LF_DEFAULT_HTTP_LIBRARY') ) {
-            error_log('using WP_Http thru extension');
             $httplib = LF_DEFAULT_HTTP_LIBRARY;
             $this->http = new $httplib;
         } else {
