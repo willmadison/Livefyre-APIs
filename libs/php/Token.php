@@ -66,7 +66,7 @@ function lftokenCreateToken($data, $key) {
 }
 
 function lftokenValidateServerToken($token, $key) {
-    $parts = explode( ',', $server_token );
+    $parts = explode( ',', $token );
     $signature = array_pop( $parts );
     $serverkey = hmacsha1( base64_decode( $key ), "Server Key" );
     $temp = base64_encode( hmacsha1( $serverkey, implode( ',', $parts ) ) );
@@ -74,6 +74,7 @@ function lftokenValidateServerToken($token, $key) {
     $duration = $parts[2];
     return ( $signature == $temp ) && ( time() - strtotime( $timestamp ) < $duration );
 }
+
 
 function lftokenValidateResponse($data, $response, $key) {
     // This was a poorly chosen name, not a great interface.
