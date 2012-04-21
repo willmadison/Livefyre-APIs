@@ -13,8 +13,8 @@ class Livefyre_Domain {
     private $host;
     private $key;
     
-    public function __construct($host, $key=null, $http_api=null) {
-        $this->host = $host;
+    public function __construct($network, $key=null, $http_api=null) {
+        $this->host = $network;
         $this->key = $key;
         if ( defined('LF_DEFAULT_HTTP_LIBRARY') ) {
             $httplib = LF_DEFAULT_HTTP_LIBRARY;
