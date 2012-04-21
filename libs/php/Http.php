@@ -10,6 +10,7 @@ class Livefyre_http {
         /* valid $args members (all optional):
             method: HTTP method
             data: associative array of "form" data
+            timeout: time to wait for a response, in seconds
         */
         if ( !isset($args['method']) ) {
             $args['method'] = isset($args['data']) ? 'POST' : 'GET';
@@ -25,17 +26,21 @@ class Livefyre_http {
     }
 
     private function curl_request($url, $args = array(), &$result) {
-        $curl_options = array(CURLOPT_RETURNTRANSFER  => true);
+        if ( ! isset( $args[ 'timeout' ] ) ) {
+            $args[ 'timeout' ] = 5;
+        }
+        $ch = curl_init($url); 
         if ( $args['method'] == 'POST' ) {
-            $curl_options = array(
-                CURLOPT_RETURNTRANSFER  => true,
+            curl_setopt_array($ch, array(
                 CURLOPT_POST            => 1,
                 CURLOPT_POSTFIELDS      => http_build_query($args['data']),
                 CURLOPT_HTTPHEADER      => array("Content-Type: $this->default_content_type")
-            );
+            ));
         }
-        $ch = curl_init($url); 
-        curl_setopt_array($ch, $curl_options);
+        curl_setopt_array($ch, array(
+            CURLOPT_TIMEOUT         => $args[ 'timeout' ],
+            CURLOPT_RETURNTRANSFER  => true
+        ));
         $response = curl_exec($ch);
         $error = curl_error($ch);
         $result['response'] = array( 'code' => curl_getinfo($ch, CURLINFO_HTTP_CODE) );
