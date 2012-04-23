@@ -19,16 +19,16 @@ class Livefyre_User {
         return $this->$uid.'@'.$this->domain->get_host();
     }
     
-    public function token($age=86400) {
+    public function token( $max_age = 86400 ) {
         $domain_key = $this->domain->get_key();
         assert('$domain_key != null /* Domain key is necessary to generate token */');
-        return Livefyre_Token::from_user($this, $age);
+        return Livefyre_Token::from_user($this, $max_age);
     }
     
-    public function auth_json() {
+    public function auth_json( $max_age = 86400 ) {
         return json_encode( 
             array(
-                "token" => $this->token( ),
+                "token" => $this->token( $max_age ),
                 "profile" => array(
                     "display_name" => $this->display_name
                 )
