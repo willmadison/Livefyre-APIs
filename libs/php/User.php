@@ -22,7 +22,7 @@ class Livefyre_User {
     public function token($age=86400) {
         $domain_key = $this->domain->get_key();
         assert('$domain_key != null /* Domain key is necessary to generate token */');
-        return Livefyre_Token::from_user($this);
+        return Livefyre_Token::from_user($this, $age);
     }
     
     public function auth_json() {
