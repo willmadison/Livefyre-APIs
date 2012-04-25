@@ -9,7 +9,7 @@ class Livefyre_Article {
     private $url;
     private $title;
     
-    public function __construct($id, $site, $tags, $url, $title) {
+    public function __construct($id, $site, $url, $title, $tags) {
         $this->id = $id;
         $this->site = $site;
         $this->tags = $tags;
