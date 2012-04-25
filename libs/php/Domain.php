@@ -37,8 +37,8 @@ class Livefyre_Domain {
         return new Livefyre_User($uid, $this, $display_name);
     }
     
-    public function site($site_id) {
-        return new Livefyre_Site($site_id, $this);
+    public function site($site_id, $key) {
+        return new Livefyre_Site($site_id, $key, $this);
     }
 
     public function validate_server_token($token) {

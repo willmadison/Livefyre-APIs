@@ -76,7 +76,7 @@ class Livefyre_Conversation {
     	$checksum = md5(json_encode($meta));
     	$collectionMeta = array("meta" => $meta,
     			"checksum" => $checksum);
-    	$jwtString = JWT::encode($collectionMeta, $this->article->get_site()->get_domain()->get_key());
+    	$jwtString = JWT::encode($collectionMeta, $this->article->get_site()->get_key());
     	$newConfig = array("collectionMeta" => $jwtString,
     			"checksum" => $checksum,
     			"siteId" =>  $this->article->get_site()->get_id(),
