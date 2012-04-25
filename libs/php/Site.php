@@ -11,8 +11,8 @@ class Livefyre_Site {
         $this->domain = $domain;
     }
     
-    public function article($article_id) {
-        return new Livefyre_Article($article_id, $this);
+    public function article($article_id, $url, $title, $tags = "") {
+        return new Livefyre_Article($article_id, $this, $url, $title, $tags);
     }
     
     public function get_domain() {
