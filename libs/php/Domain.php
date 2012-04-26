@@ -37,30 +37,38 @@ class Livefyre_Domain {
     public function user($uid, $display_name = null) {
         return new Livefyre_User($uid, $this, $display_name);
     }
-
-    function authenticate_js( $token_url, $cookie_path = '/' ) {
     
+    public function authenticate_js( $token_url = '', $cookie_path = '/' ) {
+        
+        /*
+            This script should be rendered when it appears the user is logged in
+            Now we attempt to fetch Livefyre credentials from a cookie,
+            falling back to ajax as needed.
+        */
         $cookie_name = LF_NETWORK_COOKIE_PREFIX . $this->get_host();
         ?>
             <script type="text/javascript">
-                // This script is being rendered because it appears the user is logged in
-                // Now we attempt to fetch Livefyre credentials from a cookie,
-                // falling back to ajax as needed.
                 LF.ready(function(){
                     var lfCookieName = '<?php echo $cookie_name; ?>';
                     if (!$jl.cookie(lfCookieName)) {
-                        // fetch via ajax
-                        $jl.ajax({
-                            url: '<?php echo $token_url; ?>',
-                            type: 'json',
-                            success: function(json){
-                                LF.login(json);
-                                $jl.cookie(lfCookieName, $jl.JSON.stringify(json), {expires:1, path:'<?php echo $cookie_path ?>'});
-                            },
-                            error: function(a, b){
-                                console.log("There was some problem fetching a livefyre token. ", a, b);
-                            }
-                        });
+                        <?php
+                        if ( !empty($token_url) ) {
+                            ?>
+                            // fetch via ajax
+                            $jl.ajax({
+                                url: '<?php echo $token_url; ?>',
+                                type: 'json',
+                                success: function(json){
+                                    LF.login(json);
+                                    $jl.cookie(lfCookieName, $jl.JSON.stringify(json), {expires:1, path:'<?php echo $cookie_path ?>'});
+                                },
+                                error: function(a, b){
+                                    console.log("There was some problem fetching a livefyre token. ", a, b);
+                                }
+                            });
+                            <?php
+                        }
+                        ?>
                     } else {
                         try {
                             var lfLoginConfig = eval('('+$jl.cookie(lfCookieName)+')');
