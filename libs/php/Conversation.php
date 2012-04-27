@@ -84,7 +84,7 @@ class Livefyre_Conversation {
         
         $builds_token = true;
         if ( $profile_domain != LF_DEFAULT_PROFILE_DOMAIN ) {
-            $config[ 'network' ] = $profile_domain;
+            $newConfig[ 'network' ] = $profile_domain;
         } else {
             // nobody but Livefyre can build tokens for livefyre.com profiles
             $builds_token = false;

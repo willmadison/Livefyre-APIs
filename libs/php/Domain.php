@@ -37,7 +37,7 @@ class Livefyre_Domain {
         return new Livefyre_User($uid, $this, $display_name);
     }
     
-    public function site($site_id, $key) {
+    public function site($site_id, $key = null) {
         return new Livefyre_Site($site_id, $key, $this);
     }
 
