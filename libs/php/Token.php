@@ -1,14 +1,18 @@
 <?php
 
 define('LFTOKEN_MAX_AGE', 86400);
+include('JWT.php');
 
 class Livefyre_Token {
     static function from_user($user, $max_age=LFTOKEN_MAX_AGE) {
         $secret = $user->get_domain()->get_key();
-        $args = array('auth', $user->get_domain()->get_host(), $user->get_uid());
-        $data = lftokenCreateData(gmdate('c'), $max_age, $args);
-        $value = lftokenCreateToken($data, base64_decode($secret));
-        return $value;
+        $args = array(
+            'domain' => $user->get_domain()->get_host(), 
+            'user_id' => $user->get_uid(),
+            'expires' => time() + $max_age,
+            'display_name' => $user->display_name
+        );
+        return JWT::encode($args, $secret);
     }
 }
 
