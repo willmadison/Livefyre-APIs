@@ -6,7 +6,7 @@ if ( !defined( 'LF_DEFAULT_TLD' ) ) {
 if ( !defined( 'LF_DEFAULT_PROFILE_DOMAIN' ) ) {
     define( 'LF_DEFAULT_PROFILE_DOMAIN', 'livefyre.com' );
 }
-define( 'LF_NETWORK_COOKIE_PREFIX', 'livefyre_token_' );
+define( 'LF_COOKIE_PREFIX', 'livefyre_' );
 include("User.php");
 include("Site.php");
 
@@ -38,6 +38,37 @@ class Livefyre_Domain {
         return new Livefyre_User($uid, $this, $display_name);
     }
     
+    public function token_cookie_name() {
+        return LF_COOKIE_PREFIX . 'token_' . $this->get_host();
+    }
+    
+    public function dname_cookie_name() {
+        return LF_COOKIE_PREFIX . 'display_name_' . $this->get_host();
+    }
+    
+    public function set_token_cookie( $token, $cookie_path, $cookie_domain, $expire = null, $secure = false ) {
+        $this->set_cookie($this->token_cookie_name(), $token, $cookie_path, $cookie_domain, $expire, $secure = false);
+    }
+    
+    public function set_display_name_cookie( $display_name, $cookie_path, $cookie_domain, $expire = null, $secure = false ) {
+        if ($expire == null) {
+            $expire = time() + 1210000;
+        }
+        $this->set_cookie($this->dname_cookie_name(), $display_name, $cookie_path, $cookie_domain, $expire, $secure = false);
+    }
+    
+    public function set_cookie( $name, $value, $cookie_path, $cookie_domain, $expire = null, $secure = false ) {
+        if ( $expire == null ) {
+            $expire = time() + 86400;
+        }
+        setcookie( $name, $value, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure, false );
+    }
+    
+    public function clear_cookies( $cookie_path, $cookie_domain ) {
+        setcookie( $this->dname_cookie_name(), ' ', time() - 31536000, $cookie_path, $cookie_domain );
+        setcookie( $this->token_cookie_name(), ' ', time() - 31536000, $cookie_path, $cookie_domain );
+    }
+    
     public function authenticate_js( $token_url = '', $cookie_path = '/', $token_cookie = null, $dname_cookie = null  ) {
         
         /*
@@ -45,8 +76,8 @@ class Livefyre_Domain {
             Now we attempt to fetch Livefyre credentials from a cookie,
             falling back to ajax as needed.
         */
-        $token_cookie = $token_cookie ? $token_cookie : LF_NETWORK_COOKIE_PREFIX . 'token_' . $this->get_host();
-        $dname_cookie = $dname_cookie ? $dname_cookie : LF_NETWORK_COOKIE_PREFIX . 'display_name_' . $this->get_host();
+        $token_cookie = $token_cookie ? $token_cookie : $this->token_cookie_name();
+        $dname_cookie = $dname_cookie ? $dname_cookie : $this->dname_cookie_name();
         ?>
             <script type="text/javascript">
                 LF.ready(function(){
@@ -76,7 +107,7 @@ class Livefyre_Domain {
                         try {
                             LF.login({
                                 token: $jl.cookie(lfTokenCookie),
-                                profile: {display_name: $jl.cookie(lfDnameCookie)},
+                                profile: {display_name: $jl.cookie(lfDnameCookie).replace(/\+/g, ' ')},
                             });
                         } catch (e) {
                             console.log("Error attempting to login with ", lfTokenCookie, " cookie value: ", $jl.cookie(lfTokenCookie), " ", e);
