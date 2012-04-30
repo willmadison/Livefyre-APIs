@@ -9,9 +9,11 @@ class Livefyre_Token {
         $args = array(
             'domain' => $user->get_domain()->get_host(), 
             'user_id' => $user->get_uid(),
-            'expires' => time() + $max_age,
-            'display_name' => $user->display_name
+            'expires' => time() + $max_age
         );
+        if (!empty($user->display_name)) {
+            $args['display_name'] = $user->display_name;
+        }
         return JWT::encode($args, $secret);
     }
 }
