@@ -98,7 +98,7 @@ class Livefyre_Conversation {
     			"tags" => $this->article->get_tags());
     	$checksum = md5(json_encode($meta));
     	$collectionMeta = array("meta" => $meta,
-    			"checksum", $checksum);
+    			"checksum" => $checksum);
     	 
     	$jwtString = JWT::encode($collectionMeta, "asdfjkhasuirasdfasdf");
     	$newConfig = array("collectionMeta" => $jwtString,
