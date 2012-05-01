@@ -1,4 +1,5 @@
 <?php
+require_once('JWT.php');
 
 class Livefyre_Conversation {
     private $id;
@@ -60,6 +61,62 @@ class Livefyre_Conversation {
             ' . $login_js . '
             ' . $this->render_js_delegates() . '
         </script>';
+    }
+    
+    public function to_initjs_v1( $user = null, $display_name = null, $backplane = false ) {
+    	 $this->to_initjs( $user, $display_name, $backplane );
+    }
+    
+    public function to_initjs_v2( $user = null, $display_name = null, $backplane = false ) {
+    	// When called, this will render all delegates added thru add_js_delegate
+    	$profile_domain = $this->article->get_site()->get_domain()->get_host();
+    	$config = array(
+    			'site_id' => $this->article->get_site()->get_id(),
+    			'article_id' => $this->article->get_id()
+    	);
+    	$builds_token = true;
+    	if ( $profile_domain != LF_DEFAULT_PROFILE_DOMAIN ) {
+    		$config[ 'domain' ] = $profile_domain;
+    	} else {
+    		// nobody but Livefyre can build tokens for livefyre.com profiles
+    		$builds_token = false;
+    	}
+    	if ( $backplane ) {
+    		$add_backplane = 'if ( typeof(Backplane) != \'undefined\' ) { lf_config.backplane = Backplane; };';
+    	} else {
+    		$add_backplane = '';
+    	}
+    	$login_js = '';
+    	if ( $user && $builds_token ) {
+    		$login_json = array( 'token' => $user->token( ), 'profile' => array('display_name' => $display_name) );
+    		$login_json_str = json_encode( $login_json );
+    		$login_js = "LF.ready( function() {LF.login($login_json_str);} );";
+    	}
+    	 
+    	$meta = array("title" => $this->article->get_title(),
+    			"url" => $this->article->get_url(),
+    			"tags" => $this->article->get_tags());
+    	$checksum = md5(json_encode($meta));
+    	$collectionMeta = array("meta" => $meta,
+    			"checksum", $checksum);
+    	 
+    	$jwtString = JWT::encode($collectionMeta, "asdfjkhasuirasdfasdf");
+    	$newConfig = array("collectionMeta" => $jwtString,
+    			"checksum" => $checksum,
+    			"siteId" =>  $this->article->get_site()->get_id(),
+    			"articleId" => $this->article->get_id(),
+    			"network" => $profile_domain);
+    	
+    	
+    	
+    	return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_TLD . '/wjs/v1.0/javascripts/livefyre_init.js"></script>
+    	<script type="text/javascript">
+    	var lf_config = ' . json_encode( $newConfig ) . ';
+    	' . $add_backplane . '
+    	var conv = LF(lf_config);
+    	' . $login_js . '
+    	' . $this->render_js_delegates() . '
+    	</script>';
     }
 
     public function to_html( ) {
