@@ -5,9 +5,11 @@ include('Article.php');
 class Livefyre_Site {
     private $id;
     private $domain;
+    private $key;
     
-    public function __construct($id, $domain) {
+    public function __construct($id, $key, $domain) {
         $this->id = $id;
+        $this->key = $key;
         $this->domain = $domain;
     }
     
@@ -21,6 +23,10 @@ class Livefyre_Site {
     
     public function get_id() {
         return $this->id;
+    }
+    
+    public function get_key() {
+    	return $this->key;
     }
 }
 
