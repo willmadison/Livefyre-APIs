@@ -119,7 +119,7 @@ class Livefyre_Domain {
     
     }
 
-    public function site($site_id, $key) {
+    public function site($site_id, $key = null) {
         return new Livefyre_Site($site_id, $key, $this);
     }
 
