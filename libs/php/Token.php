@@ -76,9 +76,14 @@ function lftokenValidateServerToken($token, $key) {
     $signature = array_pop( $parts );
     $serverkey = hmacsha1( base64_decode( $key ), "Server Key" );
     $temp = base64_encode( hmacsha1( $serverkey, implode( ',', $parts ) ) );
-    $timestamp = $parts[1];
-    $duration = $parts[2];
-    return ( $signature == $temp ) && ( time() - strtotime( $timestamp ) < $duration );
+    if (count($parts) > 1) {
+        $timestamp = strtotime($parts[1]);
+        $duration = $parts[2];
+    } else {
+        $timestamp = time() - 1;
+        $duration = 0;
+    }
+    return ( $signature == $temp ) && ( time() - $timestamp < $duration );
 }
 
 
