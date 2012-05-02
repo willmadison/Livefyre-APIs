@@ -61,7 +61,7 @@ class Livefyre_Domain {
         if ( $expire == null ) {
             $expire = time() + 86400;
         }
-        setcookie( $name, $value, $expire, COOKIEPATH, COOKIE_DOMAIN, $secure, false );
+        setcookie( $name, $value, $expire, $cookie_path, $cookie_domain, $secure, false );
     }
     
     public function clear_cookies( $cookie_path, $cookie_domain ) {
