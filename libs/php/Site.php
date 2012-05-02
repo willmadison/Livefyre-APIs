@@ -26,7 +26,7 @@ class Livefyre_Site {
     }
     
     public function get_key() {
-    	return $this->key;
+        return $this->key;
     }
 }
 
