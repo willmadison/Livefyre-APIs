@@ -28,12 +28,15 @@ class Livefyre_Conversation {
         return $str_out;
     }
 
-    public function to_initjs( $user = null, $display_name = null, $backplane = false ) {
+    public function to_initjs( $user = null, $display_name = null, $backplane = false, $jquery_ready = false ) {
         // When called, this will render all delegates added thru add_js_delegate
-        $profile_domain = $this->article->get_site()->get_domain()->get_host();
+        $article = $this->article;
+        $site = $article->get_site();
+        $profile_domain = $site->get_domain()->get_host();
+        $site_key = $site->get_key();
         $config = array(
-            'site_id' => $this->article->get_site()->get_id(),
-            'article_id' => $this->article->get_id()
+            'site_id' => $site->get_id(),
+            'article_id' => $article->get_id()
         );
         $builds_token = true;
         if ( $profile_domain != LF_DEFAULT_PROFILE_DOMAIN ) {
@@ -41,6 +44,15 @@ class Livefyre_Conversation {
         } else {
             // nobody but Livefyre can build tokens for livefyre.com profiles
             $builds_token = false;
+        }
+        if ( !empty($site_key) && !empty($article->get_url()) && !empty($article->get_title()) ) {
+            // Produce a conv meta checksum if we have enough data
+            $sig_fields = array($config['article_id'], $article->get_url(), $article->get_title(), $site_key);
+            $config['conv_meta'] = array(
+                'article_url' => $article->get_url(),
+                'title' => $article->get_title(),
+                'sig' => md5(implode(',', $sig_fields))
+            );
         }
         if ( $backplane ) {
             $add_backplane = 'if ( typeof(Backplane) != \'undefined\' ) { lf_config.backplane = Backplane; };';
@@ -55,11 +67,13 @@ class Livefyre_Conversation {
         }
         return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_TLD . '/wjs/v1.0/javascripts/livefyre_init.js"></script>
         <script type="text/javascript">
+            ' . ($jquery_ready ? 'jQuery(function(){' : '') . '
             var lf_config = ' . json_encode( $config ) . ';
             ' . $add_backplane . '
             var conv = LF(lf_config);
             ' . $login_js . '
             ' . $this->render_js_delegates() . '
+            ' . ($jquery_ready ? '});' : '') . '
         </script>';
     }
     
