@@ -69,6 +69,10 @@ class Livefyre_Domain {
         setcookie( $this->token_cookie_name(), ' ', time() - 31536000, $cookie_path, $cookie_domain );
     }
     
+    public function source_js_v1() {
+        return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_TLD . '/wjs/v1.0/javascripts/livefyre_init.js"></script>';
+    }
+    
     public function authenticate_js( $token_url = '', $cookie_path = '/', $token_cookie = null, $dname_cookie = null  ) {
         
         /*
