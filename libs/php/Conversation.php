@@ -92,7 +92,8 @@ class Livefyre_Conversation {
         $profile_domain = $this->article->get_site()->get_domain()->get_host();
         $meta = array("title" => $this->article->get_title(),
                 "url" => $this->article->get_url(),
-                "tags" => $this->article->get_tags());
+                "tags" => $this->article->get_tags(),
+                "articleId" => $this->article->get_id());
         $checksum = md5(json_encode($meta));
         $collectionMeta = array("meta" => $meta,
                 "checksum" => $checksum);
