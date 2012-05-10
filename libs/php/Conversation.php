@@ -96,12 +96,12 @@ class Livefyre_Conversation {
                 "articleId" => $this->article->get_id());
         $checksum = md5(json_encode($meta));
         $collectionMeta = array("meta" => $meta,
+                "articleId" => $this->article->get_id(),
                 "checksum" => $checksum);
         $jwtString = JWT::encode($collectionMeta, $this->article->get_site()->get_key());
         $newConfig = array("collectionMeta" => $jwtString,
                 "checksum" => $checksum,
                 "siteId" =>  $this->article->get_site()->get_id(),
-                "articleId" => $this->article->get_id(),
                 "el" => $el);
         
         $builds_token = true;
