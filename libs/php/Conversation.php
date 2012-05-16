@@ -83,7 +83,11 @@ class Livefyre_Conversation {
          return $this->to_initjs( $user, $display_name, $backplane, false, false );
     }
     
-    public function to_initjs_v2( $user = null, $display_name = null, $backplane = false, $el = false ) {
+    public function to_initjs_v2( $user = null, $display_name = null, $backplane = false, $el = false, $engage_app_name = null ) {
+    	$article = $this->article;
+    	$site = $article->get_site();
+    	$domain = $site->get_domain();
+    	
         // When called, this will render all delegates added thru add_js_delegate
         if (empty($el)) {
             $error = 'Unable to initialize Livefyre - you must specify a target element for the interface as required parameter \'el\' in JavaScript or when calling $conversation->to_initjs_v2()';
@@ -123,16 +127,33 @@ class Livefyre_Conversation {
             $login_js = "LF.ready( function() {LF.login($login_json_str);} );";
         }
         
-        return '<script type="text/javascript" src="http://zor.t101.livefyre.com/wjs/v2.0/javascripts/livefyre.js"></script>
-        <script type="text/javascript">
-        var lf_config = ' . json_encode( $newConfig ) . ';
-        ' . $add_backplane . '
-        var conv = fyre.conv.load(lf_config);
-        ' . '' /* $login_js */ . '
-        ' . '' /* $this->render_js_delegates() */ . '
-        </script>';
+        /* 
+         * Time to build up the response:
+         * 1) Script tags
+         * 2) Config vars
+         * 3) Instantiation and putting it all together
+         */
+        $resp = "";
+        
+        /*
+		 * 1) LFSP script tag MUST go before the regular script for now. Reason is because the LF obj gets set to {} in LFSP, so if you do it the other
+		 * way around, any of the settings will get wiped out. Jonathan will change in a later version, but.... for now, this is how it is. 
+		 */
+        $resp = ($engage_app_name != null ? $domain->source_lfsp_js_v2() . $domain->source_js_v2() : $domain->source_js_v2()) .
+       			'<script type="text/javascript">' .
+        // 2)
+        		($engage_app_name != null ? 'var authDelegate = new fyre.conv.SPAuthDelegate({engage: {app: "' . $engage_app_name . '"}});' : '') .
+        		'var lf_config = ' . json_encode( $newConfig ) . ';' .
+        		$add_backplane .
+        // 3)
+       			($engage_app_name != null ? 'var conv = fyre.conv.load({"authDelegate": authDelegate}, lf_config);' : 'var conv = fyre.conv.load({}, lf_config);') .
+		        '' /* $login_js */ .
+		        '' /* $this->render_js_delegates() */ .
+		        '</script>';
+        
+        return $resp;
     }
-
+    
     public function to_html( ) {
         assert('$this->article != null /* Article is necessary to get HTML */');
         $site_id = $this->article->get_site()->get_id();
