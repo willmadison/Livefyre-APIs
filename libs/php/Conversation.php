@@ -127,31 +127,14 @@ class Livefyre_Conversation {
             $login_js = "LF.ready( function() {LF.login($login_json_str);} );";
         }
         
-        /* 
-         * Time to build up the response:
-         * 1) Script tags
-         * 2) Config vars
-         * 3) Instantiation and putting it all together
-         */
-        $resp = "";
-        
-        /*
-		 * 1) LFSP script tag MUST go before the regular script for now. Reason is because the LF obj gets set to {} in LFSP, so if you do it the other
-		 * way around, any of the settings will get wiped out. Jonathan will change in a later version, but.... for now, this is how it is. 
-		 */
-        $resp = ($engage_app_name != null ? $domain->source_lfsp_js_v2() . $domain->source_js_v2() : $domain->source_js_v2()) .
-       			'<script type="text/javascript">' .
-        // 2)
+        return '<script type="text/javascript">' . 
         		($engage_app_name != null ? 'var authDelegate = new fyre.conv.SPAuthDelegate({engage: {app: "' . $engage_app_name . '"}});' : '') .
         		'var lf_config = ' . json_encode( $newConfig ) . ';' .
         		$add_backplane .
-        // 3)
        			($engage_app_name != null ? 'var conv = fyre.conv.load({"authDelegate": authDelegate}, lf_config);' : 'var conv = fyre.conv.load({}, lf_config);') .
 		        '' /* $login_js */ .
 		        '' /* $this->render_js_delegates() */ .
 		        '</script>';
-        
-        return $resp;
     }
     
     public function to_html( ) {

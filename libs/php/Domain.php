@@ -76,14 +76,12 @@ class Livefyre_Domain {
     }
     
     public function source_js_v2() {
-    	return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_PROFILE_DOMAIN . '/wjs/v2.0/javascripts/livefyre_init.js"></script>';
+    	return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_TLD . '/wjs/v2.0/javascripts/livefyre_init.js"></script>';
     }
     
-    /*
-     * Starting at V2 since we never really had a V1 and to keep the versions consistent
-     */
-    public function source_lfsp_js_v2() {
-    	return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_TLD . '/wjs/v2.0/javascripts/livefyre_sp.js"></script>';
+    public function source_js_v2_and_lfsp() {
+    	return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_PROFILE_DOMAIN . '/wjs/v2.0/javascripts/livefyre_sp.js"></script>' .
+    		   '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_TLD . '/wjs/v2.0/javascripts/livefyre_init.js"></script>';
     }
     
     public function authenticate_js( $token_url = '', $cookie_path = '/', $token_cookie = null, $dname_cookie = null  ) {
