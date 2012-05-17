@@ -6,7 +6,9 @@ if ( !defined( 'LF_DEFAULT_TLD' ) ) {
 if ( !defined( 'LF_DEFAULT_PROFILE_DOMAIN' ) ) {
     define( 'LF_DEFAULT_PROFILE_DOMAIN', 'livefyre.com' );
 }
+
 define( 'LF_COOKIE_PREFIX', 'livefyre_' );
+
 include("User.php");
 include("Site.php");
 
@@ -71,6 +73,15 @@ class Livefyre_Domain {
     
     public function source_js_v1() {
         return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_TLD . '/wjs/v1.0/javascripts/livefyre_init.js"></script>';
+    }
+    
+    public function source_js_v2() {
+    	return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_TLD . '/wjs/v2.0/javascripts/livefyre.js"></script>';
+    }
+    
+    public function source_js_v2_and_lfsp() {
+    	return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_PROFILE_DOMAIN . '/wjs/v2.0/javascripts/livefyre_sp.js"></script>' .
+    		   '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_TLD . '/wjs/v2.0/javascripts/livefyre.js"></script>';
     }
     
     public function authenticate_js( $token_url = '', $cookie_path = '/', $token_cookie = null, $dname_cookie = null  ) {
