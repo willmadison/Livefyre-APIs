@@ -93,19 +93,19 @@ class Livefyre_Conversation {
             $error = 'Unable to initialize Livefyre - you must specify a target element for the interface as required parameter \'el\' in JavaScript or when calling $conversation->to_initjs_v2()';
             return '<!-- ' . $error . ' --> <script type="text/javascript">console.log("' . $error . '")</script>'; // TODO insert documentation link
         }
-        $profile_domain = $this->article->get_site()->get_domain()->get_host();
-        $meta = array("title" => $this->article->get_title(),
-                "url" => $this->article->get_url(),
-                "tags" => $this->article->get_tags(),
-                "articleId" => $this->article->get_id());
+        $profile_domain = $domain->get_host();
+        $meta = array("title" => $article->get_title(),
+                "url" => $article->get_url(),
+                "tags" => $article->get_tags(),
+                "articleId" => $article->get_id());
         $checksum = md5(json_encode($meta));
         $collectionMeta = array("meta" => $meta,
-                "articleId" => $this->article->get_id(),
+                "articleId" => $article->get_id(),
                 "checksum" => $checksum);
-        $jwtString = JWT::encode($collectionMeta, $this->article->get_site()->get_key());
+        $jwtString = JWT::encode($collectionMeta, $site->get_key());
         $newConfig = array("collectionMeta" => $jwtString,
                 "checksum" => $checksum,
-                "siteId" =>  $this->article->get_site()->get_id(),
+                "siteId" =>  $site->get_id(),
                 "el" => $el);
         
         $builds_token = true;
