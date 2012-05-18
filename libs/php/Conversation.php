@@ -83,25 +83,28 @@ class Livefyre_Conversation {
          return $this->to_initjs( $user, $display_name, $backplane, false, false );
     }
     
-    public function to_initjs_v2( $user = null, $display_name = null, $backplane = false, $el = false ) {
+    public function to_initjs_v2( $user = null, $display_name = null, $backplane = false, $el = false, $engage_app_name = null ) {
+    	$article = $this->article;
+    	$site = $article->get_site();
+    	$domain = $site->get_domain();
+    	
         // When called, this will render all delegates added thru add_js_delegate
         if (empty($el)) {
             $error = 'Unable to initialize Livefyre - you must specify a target element for the interface as required parameter \'el\' in JavaScript or when calling $conversation->to_initjs_v2()';
             return '<!-- ' . $error . ' --> <script type="text/javascript">console.log("' . $error . '")</script>'; // TODO insert documentation link
         }
-        $profile_domain = $this->article->get_site()->get_domain()->get_host();
-        $collectionMeta = array("title" => $this->article->get_title(),
-                "url" => $this->article->get_url(),
-                "tags" => $this->article->get_tags());
+        $profile_domain = $domain->get_host();
+        $collectionMeta = array("title" => $article->get_title(),
+                "url" => $article->get_url(),
+                "tags" => $article->get_tags());
         $checksum = md5(json_encode($collectionMeta));
         $collectionMeta["checksum"] = md5(json_encode($collectionMeta));
-        $collectionMeta["articleId"] = $this->article->get_id();
+        $collectionMeta["articleId"] = $article->get_id();
 
-        $jwtString = JWT::encode($collectionMeta, $this->article->get_site()->get_key());
+        $jwtString = JWT::encode($collectionMeta, $site->get_key());
         $newConfig = array("collectionMeta" => $jwtString,
                 "checksum" => $checksum,
-                "siteId" =>  $this->article->get_site()->get_id(),
-                "articleId" => $this->article->get_id(),
+                "siteId" =>  $site->get_id(),
                 "el" => $el);
         
         $builds_token = true;
@@ -123,16 +126,16 @@ class Livefyre_Conversation {
             $login_js = "LF.ready( function() {LF.login($login_json_str);} );";
         }
         
-        return '<script type="text/javascript" src="http://zor.t101.livefyre.com/wjs/v2.0/javascripts/livefyre.js"></script>
-        <script type="text/javascript">
-        var lf_config = ' . json_encode( $newConfig ) . ';
-        ' . $add_backplane . '
-        var conv = fyre.conv.load(lf_config);
-        ' . '' /* $login_js */ . '
-        ' . '' /* $this->render_js_delegates() */ . '
-        </script>';
+        return '<script type="text/javascript">' . 
+        		($engage_app_name != null ? 'var authDelegate = new fyre.conv.SPAuthDelegate({engage: {app: "' . $engage_app_name . '"}});' : '') .
+        		'var lf_config = ' . json_encode( array($newConfig) ) . ';' .
+        		$add_backplane .
+       			($engage_app_name != null ? 'var conv = fyre.conv.load({"authDelegate": authDelegate}, lf_config);' : 'var conv = fyre.conv.load({}, lf_config);') .
+		        '' /* $login_js */ .
+		        '' /* $this->render_js_delegates() */ .
+		        '</script>';
     }
-
+    
     public function to_html( ) {
         assert('$this->article != null /* Article is necessary to get HTML */');
         $site_id = $this->article->get_site()->get_id();
