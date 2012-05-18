@@ -76,11 +76,11 @@ class Livefyre_Domain {
     }
     
     public function source_js_v2() {
-    	return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_TLD . '/wjs/v2.0/javascripts/livefyre.js"></script>';
+    	return '<script type="text/javascript" src="http://zor.t405.' . LF_DEFAULT_TLD . '/wjs/v2.0/javascripts/livefyre.js"></script>';
     }
     
     public function source_js_v2_and_lfsp() {
-    	return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_PROFILE_DOMAIN . '/wjs/v2.0/javascripts/livefyre_sp.js"></script>' .
+    	return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_PROFILE_DOMAIN . '/wjs/v2.0/javascripts/simpleprofile.js"></script>' .
     		   '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_TLD . '/wjs/v2.0/javascripts/livefyre.js"></script>';
     }
     

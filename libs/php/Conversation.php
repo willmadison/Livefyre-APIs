@@ -129,7 +129,7 @@ class Livefyre_Conversation {
         
         return '<script type="text/javascript">' . 
         		($engage_app_name != null ? 'var authDelegate = new fyre.conv.SPAuthDelegate({engage: {app: "' . $engage_app_name . '"}});' : '') .
-        		'var lf_config = ' . json_encode( $newConfig ) . ';' .
+        		'var lf_config = ' . json_encode( array($newConfig) ) . ';' .
         		$add_backplane .
        			($engage_app_name != null ? 'var conv = fyre.conv.load({"authDelegate": authDelegate}, lf_config);' : 'var conv = fyre.conv.load({}, lf_config);') .
 		        '' /* $login_js */ .
