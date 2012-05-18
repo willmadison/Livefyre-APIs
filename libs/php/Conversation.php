@@ -90,18 +90,18 @@ class Livefyre_Conversation {
             return '<!-- ' . $error . ' --> <script type="text/javascript">console.log("' . $error . '")</script>'; // TODO insert documentation link
         }
         $profile_domain = $this->article->get_site()->get_domain()->get_host();
-        $meta = array("title" => $this->article->get_title(),
+        $collectionMeta = array("title" => $this->article->get_title(),
                 "url" => $this->article->get_url(),
-                "tags" => $this->article->get_tags(),
-                "articleId" => $this->article->get_id());
-        $checksum = md5(json_encode($meta));
-        $collectionMeta = array("meta" => $meta,
-                "articleId" => $this->article->get_id(),
-                "checksum" => $checksum);
+                "tags" => $this->article->get_tags());
+        $checksum = md5(json_encode($collectionMeta));
+        $collectionMeta["checksum"] = md5(json_encode($collectionMeta));
+        $collectionMeta["articleId"] = $this->article->get_id();
+
         $jwtString = JWT::encode($collectionMeta, $this->article->get_site()->get_key());
         $newConfig = array("collectionMeta" => $jwtString,
                 "checksum" => $checksum,
                 "siteId" =>  $this->article->get_site()->get_id(),
+                "articleId" => $this->article->get_id(),
                 "el" => $el);
         
         $builds_token = true;
