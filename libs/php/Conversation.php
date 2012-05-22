@@ -29,18 +29,22 @@ class Livefyre_Conversation {
     }
 
     public function to_initjs( $user = null, $display_name = null, $backplane = false, $jquery_ready = false, $include_source = true ) {
-        // When called, this will render all delegates added thru add_js_delegate
+        /*
+            **DEPRECATED**
+            Please use to_initjs_v3() if you are on Livefyre comments V3
+        */
         $article = $this->article;
         $site = $article->get_site();
-        $profile_domain = $site->get_domain()->get_host();
+        $domain = $site->get_domain();
+        $network_name = $domain->get_host();
         $site_key = $site->get_key();
         $config = array(
             'site_id' => $site->get_id(),
             'article_id' => $article->get_id()
         );
         $builds_token = true;
-        if ( $profile_domain != LF_DEFAULT_PROFILE_DOMAIN ) {
-            $config[ 'domain' ] = $profile_domain;
+        if ( $network_name != LF_DEFAULT_PROFILE_DOMAIN ) {
+            $config[ 'domain' ] = $network_name;
         } else {
             // nobody but Livefyre can build tokens for livefyre.com profiles
             $builds_token = false;
@@ -67,7 +71,7 @@ class Livefyre_Conversation {
             $login_json_str = json_encode( $login_json );
             $login_js = "LF.ready( function() {LF.login($login_json_str);} );";
         }
-        return ($include_source ? $profile_domain->source_js_v1() : ''). '
+        return ($include_source ? $domain->source_js_v1() : ''). '
             <script type="text/javascript">
                 ' . ($jquery_ready ? 'jQuery(function(){' : '') . '
                 var lf_config = ' . json_encode( $config ) . ';
@@ -79,61 +83,76 @@ class Livefyre_Conversation {
             </script>';
     }
     
-    public function to_initjs_v1( $user = null, $display_name = null, $backplane = false ) {
-         return $this->to_initjs( $user, $display_name, $backplane, false, false );
+    public function to_initjs_v2( $user = null, $display_name = null, $backplane = false,  $el = false, $engage_app_name = null ) {
+         return $this->to_initjs_v3( $el, $backplane );
     }
     
-    public function to_initjs_v2( $user = null, $display_name = null, $backplane = false, $el = false, $engage_app_name = null ) {
-    	$article = $this->article;
-    	$site = $article->get_site();
-    	$domain = $site->get_domain();
-    	
-        // When called, this will render all delegates added thru add_js_delegate
-        if (empty($el)) {
-            $error = 'Unable to initialize Livefyre - you must specify a target element for the interface as required parameter \'el\' in JavaScript or when calling $conversation->to_initjs_v2()';
-            return '<!-- ' . $error . ' --> <script type="text/javascript">console.log("' . $error . '")</script>'; // TODO insert documentation link
-        }
-        $profile_domain = $domain->get_host();
+    public function collection_meta() {
+        $article = $this->article;
+        $site = $article->get_site();
+        $domain = $site->get_domain();
         $collectionMeta = array("title" => $article->get_title(),
                 "url" => $article->get_url(),
                 "tags" => $article->get_tags());
-        $checksum = md5(json_encode($collectionMeta));
-        $collectionMeta["checksum"] = md5(json_encode($collectionMeta));
-        $collectionMeta["articleId"] = $article->get_id();
-
-        $jwtString = JWT::encode($collectionMeta, $site->get_key());
-        $newConfig = array("collectionMeta" => $jwtString,
-                "checksum" => $checksum,
-                "siteId" =>  $site->get_id(),
-                "el" => $el);
         
-        $builds_token = true;
-        if ( $profile_domain != LF_DEFAULT_PROFILE_DOMAIN ) {
-            $newConfig[ 'network' ] = $profile_domain;
+        $checksum = md5(json_encode($collectionMeta));
+        $collectionMeta["checksum"] = $checksum;
+        $collectionMeta["articleId"] = $article->get_id();
+        $jwtString = JWT::encode($collectionMeta, $site->get_key());
+        return array('collectionMeta' => $jwtString, 'checksum' => $checksum);
+    }
+    
+    public function to_initjs_v3( $el = false, $backplane = false, $config = null ) {
+        // We have to build this string of JS in a weird way because we conditionally include 
+        // direct JS references, which isn't possible with json_encode
+        $onload = '';
+        if ( is_string($config) or $config == null ) {
+            $delegate = $config;
         } else {
-            // nobody but Livefyre can build tokens for livefyre.com profiles
-            $builds_token = false;
+            if ( isset( $config['delegate'] ) ) {
+                $delegate = $config['delegate'];
+            } else {
+                $delegate = null;
+            }
+            if ( isset( $config['onload'] ) ) {
+                $onload = ', ' . $config['onload'];
+            }
         }
+        if (empty($el)) {
+            $error = 'Unable to initialize Livefyre - you must specify a target element for the interface as required parameter \'el\' in JavaScript or when calling $conversation->to_initjs_v3()';
+            return '<!-- ' . $error . ' --> <script type="text/javascript">console.log("' . $error . '")</script>'; // TODO insert documentation link
+        }
+        $article = $this->article;
+        $site = $article->get_site();
+        $domain = $site->get_domain();
+        $network_name = $domain->get_host();
+        $config = $this->collection_meta();
+        $config['siteId'] = $site->get_id();
+        $config['articleId'] = $article->get_id();
+        $config['el'] = $el;
         if ( $backplane ) {
             $add_backplane = 'if ( typeof(Backplane) != \'undefined\' ) { lf_config.backplane = Backplane; };';
         } else {
             $add_backplane = '';
         }
-        $login_js = '';
-        if ( $user && $builds_token ) {
-            $login_json = array( 'token' => $user->token( ), 'profile' => array('display_name' => $display_name) );
-            $login_json_str = json_encode( $login_json );
-            $login_js = "LF.ready( function() {LF.login($login_json_str);} );";
+        $engage_app_name = $domain->get_engage_app();
+        $use_lfsp = ($engage_app_name != null);
+        if ( $use_lfsp && empty( $delegate ) ) {
+            $lfsp_delegate = 'var authDelegate = new fyre.conv.SPAuthDelegate({"engage": {"app": "' . $engage_app_name . '"}});';
+            $delegate = 'authDelegate';
         }
-        
-        return '<script type="text/javascript">' . 
-        		($engage_app_name != null ? 'var authDelegate = new fyre.conv.SPAuthDelegate({"engage": {"app": "' . $engage_app_name . '"}});' : '') .
-        		'var lf_config = ' . json_encode( array($newConfig) ) . ';' .
-        		$add_backplane .
-       			($engage_app_name != null ? 'var conv = fyre.conv.load({"network": "' . $domain->get_host() . '", "authDelegate": authDelegate}, lf_config);' : 'var conv = fyre.conv.load({}, lf_config);') .
-		        '' /* $login_js */ .
-		        '' /* $this->render_js_delegates() */ .
-		        '</script>';
+        $delegate_str = '';
+        if ( $delegate ) {
+            $delegate_str = ', "authDelegate": authDelegate';
+        }
+        $fyre_config = '{}';
+        if ( $network_name != LF_DEFAULT_PROFILE_DOMAIN ) {
+            $fyre_config = '{"network": "' . $network_name . '"' . $delegate_str . '}';
+        }
+        return '<script type="text/javascript">' . $lfsp_delegate .
+                'var lf_config = ' . json_encode( array($config) ) . ';' . $add_backplane .
+                'var conv = fyre.conv.load(' . $fyre_config . ', lf_config' . $onload . ');' .
+                '</script>';
     }
     
     public function to_html( ) {

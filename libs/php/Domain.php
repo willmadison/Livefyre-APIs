@@ -15,8 +15,18 @@ include("Site.php");
 class Livefyre_Domain {
     private $host;
     private $key;
+    private $livefyre_tld;
+    private $engage_app_name;
     
-    public function __construct($network, $key=null, $http_api=null) {
+    public function __construct( $network, $key = null, $http_api = null, $options = null ) {
+        if ( isset( $options['livefyre_tld'] ) ) {
+            $this->livefyre_tld = $options['livefyre_tld'];
+        } else {
+            $this->livefyre_tld = LF_DEFAULT_TLD;
+        }
+        if ( isset( $options['engage_app_name'] ) ) {
+            $this->engage_app_name = $options['engage_app_name'];
+        }
         $this->host = $network;
         $this->key = $key;
         if ( defined('LF_DEFAULT_HTTP_LIBRARY') ) {
@@ -27,7 +37,11 @@ class Livefyre_Domain {
             $this->http = new Livefyre_http; 
         }
     }
-
+    
+    public function get_livefyre_tld() {
+        return $this->livefyre_tld;
+    }
+    
     public function get_host() {
         return $this->host;
     }
@@ -36,8 +50,46 @@ class Livefyre_Domain {
         return $this->key;
     }
     
+    public function get_engage_app() {
+        return $this->engage_app_name;
+    }
+    
     public function user($uid, $display_name = null) {
         return new Livefyre_User($uid, $this, $display_name);
+    }
+    
+    public function push_user_data( $data ) {
+        $systemuser = $this->user( 'system' );
+        $systemuser->push( $data );
+    }
+    
+    public function set_user_affiliation( $user_id, $type, $scope = 'domain', $target_id = null ) {
+        $allowed_types = array( 'admin', 'member', 'none', 'outcast', 'owner' );
+        $allowed_scope = array( 'domain', 'site', 'conv' );
+        if ( !in_array( $type, $allowed_types ) ) {
+            trigger_error( 'You cannot set a Livefyre user\'s affiliation to a type other than the allowed: ' . implode( ', ', $allowed_types ), E_USER_ERROR );
+            return false;
+        } else {
+            if ( !in_array( $scope, $allowed_scope ) ) {
+                trigger_error( 'You cannot set a Livefyre user\'s affiliation within a scope other than the allowed: ' . implode( ', ', $allowed_scope ), E_USER_ERROR );
+                return false;
+            }
+            $user_jid = $user_id . '@' . $this->get_host();
+            $systemuser = $this->user( 'system' );
+            $request_url = 'http://' . $this->get_host() . '/api/v1.1/private/management/user/' . $user_jid . '/role/?lftoken=' . $this->user('system')->token();
+            $post_data = array(
+                'affiliation' => $type
+            );
+            if ($scope == 'domain') { 
+                $post_data['domain_wide'] = '1';
+            } elseif ($scope == 'conv') {
+                $post_data['conv_id'] = $target_id;
+            } elseif ($scope == 'site') {
+                $post_data['site_id'] = $target_id;
+            }
+            return $this->http->request( $request_url, array('method'=>'POST', 'data'=>$post_data) );
+        }
+        return false;
     }
     
     public function token_cookie_name() {
@@ -72,16 +124,11 @@ class Livefyre_Domain {
     }
     
     public function source_js_v1() {
-        return '<script type="text/javascript" src="http://zor.' . LF_DEFAULT_TLD . '/wjs/v1.0/javascripts/livefyre_init.js"></script>';
+        return '<script type="text/javascript" src="http://zor.' . $this->get_livefyre_tld() . '/wjs/v1.0/javascripts/livefyre_init.js"></script>';
     }
     
-    public function source_js_v2() {
-    	return '<script type="text/javascript" src="http://zor.t405.' . LF_DEFAULT_TLD . '/wjs/v2.0/javascripts/livefyre.js"></script>';
-    }
-    
-    public function source_js_v2_and_lfsp() {
-    	return '<script type="text/javascript" src="http://zor.t405.' . LF_DEFAULT_PROFILE_DOMAIN . '/wjs/v2.0/javascripts/simpleprofile.js"></script>' .
-    		   '<script type="text/javascript" src="http://zor.t405.' . LF_DEFAULT_TLD . '/wjs/v2.0/javascripts/livefyre.js"></script>';
+    public function source_js_v3() {
+        return '<script type="text/javascript" src="http://zor.' . $this->get_livefyre_tld() . '/wjs/v3.0/javascripts/livefyre.js"></script>';
     }
     
     public function authenticate_js( $token_url = '', $cookie_path = '/', $token_cookie = null, $dname_cookie = null  ) {
@@ -92,12 +139,12 @@ class Livefyre_Domain {
             falling back to ajax as needed.
         */
         $token_cookie = $token_cookie ? $token_cookie : $this->token_cookie_name();
-        $dname_cookie = $dname_cookie ? $dname_cookie : $this->dname_cookie_name();
+        //$dname_cookie = $dname_cookie ? $dname_cookie : $this->dname_cookie_name();
         ?>
             <script type="text/javascript">
-                LF.ready(function(){
+                function doLivefyreAuth() {
                     var lfTokenCookie = '<?php echo $token_cookie; ?>';
-                    var lfDnameCookie = '<?php echo $dname_cookie; ?>';
+                    //var lfDnameCookie = '<?php echo $dname_cookie; ?>';
                     if (!$jl.cookie(lfTokenCookie)) {
                         <?php
                         if ( !empty($token_url) ) {
@@ -107,9 +154,9 @@ class Livefyre_Domain {
                                 url: '<?php echo $token_url; ?>',
                                 type: 'json',
                                 success: function(json){
-                                    LF.login(json);
+                                    fyre.conv.login(json.token);
                                     $jl.cookie(lfTokenCookie, json.token, {expires:1, path:'<?php echo $cookie_path ?>'});
-                                    $jl.cookie(lfDnameCookie, json.profile.display_name, {expires:1, path:'<?php echo $cookie_path ?>'});
+                                    // $jl.cookie(lfDnameCookie, json.profile.display_name, {expires:1, path:'<?php echo $cookie_path ?>'});
                                 },
                                 error: function(a, b){
                                     console.log("There was some problem fetching a livefyre token. ", a, b);
@@ -120,15 +167,12 @@ class Livefyre_Domain {
                         ?>
                     } else {
                         try {
-                            LF.login({
-                                token: $jl.cookie(lfTokenCookie),
-                                profile: {display_name: $jl.cookie(lfDnameCookie).replace(/\+/g, ' ')},
-                            });
+                            fyre.conv.login($jl.cookie(lfTokenCookie));
                         } catch (e) {
                             console.log("Error attempting to login with ", lfTokenCookie, " cookie value: ", $jl.cookie(lfTokenCookie), " ", e);
                         }
                     }
-                });
+                }
             </script>
         <?php
     
