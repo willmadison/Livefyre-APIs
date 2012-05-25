@@ -5,6 +5,7 @@ include("Token.php");
 class Livefyre_User {
     private $uid;
     private $domain;
+    private $display_name;
     
     public function __construct($uid, $domain, $display_name = null) {
         $this->uid = $uid;
@@ -14,6 +15,7 @@ class Livefyre_User {
     
     public function get_uid() { return $this->uid; }
     public function get_domain() { return $this->domain; }
+    public function get_display_name() { return $this->display_name; }
     
     public function jid() {
         return $this->$uid.'@'.$this->domain->get_host();

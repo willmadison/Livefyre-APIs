@@ -139,6 +139,58 @@ class Livefyre_Domain {
             falling back to ajax as needed.
         */
         $token_cookie = $token_cookie ? $token_cookie : $this->token_cookie_name();
+        $dname_cookie = $dname_cookie ? $dname_cookie : $this->dname_cookie_name();
+        ?>
+            <script type="text/javascript">
+                LF.ready(function() {
+                    var lfTokenCookie = '<?php echo $token_cookie; ?>';
+                    var lfDnameCookie = '<?php echo $dname_cookie; ?>';
+                    if (!$jl.cookie(lfTokenCookie)) {
+                        <?php
+                        if ( !empty($token_url) ) {
+                            ?>
+                            // fetch via ajax
+                            $jl.ajax({
+                                url: '<?php echo $token_url; ?>',
+                                type: 'json',
+                                success: function(json){
+                                    LF.login(json);
+                                    $jl.cookie(lfTokenCookie, json.token, {expires:1, path:'<?php echo $cookie_path ?>'});
+                                    $jl.cookie(lfDnameCookie, json.profile.display_name, {expires:1, path:'<?php echo $cookie_path ?>'});
+                                },
+                                error: function(a, b){
+                                    console.log("There was some problem fetching a livefyre token. ", a, b);
+                                }
+                            });
+                            <?php
+                        }
+                        ?>
+                    } else {
+                        try {
+                            LF.login({
+                                token: $jl.cookie(lfTokenCookie),
+                                profile:{
+                                    display_name: $jl.cookie(lfDnameCookie)
+                                }
+                            });
+                        } catch (e) {
+                            console.log("Error attempting to login with ", lfTokenCookie, " cookie value: ", $jl.cookie(lfTokenCookie), " ", e);
+                        }
+                    }
+                });
+            </script>
+        <?php
+    
+    }
+
+    public function authenticate_js_v3( $token_url = '', $cookie_path = '/', $token_cookie = null, $dname_cookie = null  ) {
+        
+        /*
+            This script should be rendered when it appears the user is logged in
+            Now we attempt to fetch Livefyre credentials from a cookie,
+            falling back to ajax as needed.
+        */
+        $token_cookie = $token_cookie ? $token_cookie : $this->token_cookie_name();
         //$dname_cookie = $dname_cookie ? $dname_cookie : $this->dname_cookie_name();
         ?>
             <script type="text/javascript">
@@ -177,6 +229,7 @@ class Livefyre_Domain {
         <?php
     
     }
+
 
     public function site($site_id, $key = null) {
         return new Livefyre_Site($site_id, $key, $this);
