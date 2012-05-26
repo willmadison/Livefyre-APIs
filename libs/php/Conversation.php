@@ -102,8 +102,8 @@ class Livefyre_Conversation {
         return array('collectionMeta' => $jwtString, 'checksum' => $checksum);
     }
     
-    public function to_initjs_v3( $el = false, $backplane = false, $config = null ) {
-        // We have to build this string of JS in a weird way because we conditionally include 
+    public function to_initjs_v3( $el = false, $config = null, $backplane = false ) {
+        // We have to build this string of JS in a weird way because we conditionally include
         // direct JS references, which isn't possible with json_encode
         $onload = '';
         if ( is_string($config) or $config == null ) {
@@ -120,7 +120,7 @@ class Livefyre_Conversation {
         }
         if (empty($el)) {
             $error = 'Unable to initialize Livefyre - you must specify a target element for the interface as required parameter \'el\' in JavaScript or when calling $conversation->to_initjs_v3()';
-            return '<!-- ' . $error . ' --> <script type="text/javascript">console.log("' . $error . '")</script>'; // TODO insert documentation link
+            return '<!-- ' . $error . ' --> <script type="text/javascript">console.log("' . $error . '")</script>';
         }
         $article = $this->article;
         $site = $article->get_site();
@@ -135,15 +135,9 @@ class Livefyre_Conversation {
         } else {
             $add_backplane = '';
         }
-        $engage_app_name = $domain->get_engage_app();
-        $use_lfsp = ($engage_app_name != null);
-        if ( $use_lfsp && empty( $delegate ) ) {
-            $lfsp_delegate = 'var authDelegate = new fyre.conv.SPAuthDelegate({"engage": {"app": "' . $engage_app_name . '"}});';
-            $delegate = 'authDelegate';
-        }
         $delegate_str = '';
         if ( $delegate ) {
-            $delegate_str = ', "authDelegate": authDelegate';
+            $delegate_str = ', "authDelegate": ' . $delegate;
         }
         $fyre_config = '{}';
         if ( $network_name != LF_DEFAULT_PROFILE_DOMAIN ) {
