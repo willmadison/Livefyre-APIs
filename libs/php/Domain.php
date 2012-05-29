@@ -194,34 +194,37 @@ class Livefyre_Domain {
         //$dname_cookie = $dname_cookie ? $dname_cookie : $this->dname_cookie_name();
         ?>
             <script type="text/javascript">
+                if (document.location.href.indexOf('http://localhost') == 0) {
+                    console.log('Livefyre needs at least one . (dot) in the domain name.  Therefore, localhost is considered invalid - try using 127.0.0.1 instead.');
+                }
+                // these are just utility methods for working with cookies
+                function lfSetCookie(a,b,c){if(c){var d=new Date;d.setTime(d.getTime()+c*24*60*60*1e3);var e="; expires="+d.toGMTString()}else var e="";document.cookie=a+"="+b+e+"; path=/"}function lfGetCookie(a){var b=a+"=";var c=document.cookie.split(";");for(var d=0;d<c.length;d++){var e=c[d];while(e.charAt(0)==" ")e=e.substring(1,e.length);if(e.indexOf(b)==0)return e.substring(b.length,e.length)}return null}function lfDeleteCookie(a){lfSetCookie(a,"",-1)}
+                
                 function doLivefyreAuth() {
                     var lfTokenCookie = '<?php echo $token_cookie; ?>';
-                    //var lfDnameCookie = '<?php echo $dname_cookie; ?>';
-                    if (!$jl.cookie(lfTokenCookie)) {
+                    if (!lfGetCookie(lfTokenCookie)) {
                         <?php
                         if ( !empty($token_url) ) {
+                            $sep = strpos($token_url, '?') === FALSE ? '?' : '&' ;
                             ?>
-                            // fetch via ajax
-                            $jl.ajax({
-                                url: '<?php echo $token_url; ?>',
-                                type: 'json',
-                                success: function(json){
-                                    fyre.conv.login(json.token);
-                                    $jl.cookie(lfTokenCookie, json.token, {expires:1, path:'<?php echo $cookie_path ?>'});
-                                    // $jl.cookie(lfDnameCookie, json.profile.display_name, {expires:1, path:'<?php echo $cookie_path ?>'});
-                                },
-                                error: function(a, b){
-                                    console.log("There was some problem fetching a livefyre token. ", a, b);
-                                }
-                            });
+                            // fetch via JSONP
+                            window.lfTokenCallback = function(json){
+                                fyre.conv.login(json.token);
+                                lfSetCookie(lfTokenCookie, json.token, 1);
+                            };
+                            var h = document.getElementsByTagName("head")[0];
+                            var s = document.createElement('script');
+                            s.type = 'text/javascript';
+                            s.src = '<?php echo $token_url . $sep . "callback=lfTokenCallback"; ?>';
+                            h.appendChild(s);
                             <?php
                         }
                         ?>
                     } else {
                         try {
-                            fyre.conv.login($jl.cookie(lfTokenCookie));
+                            fyre.conv.login(lfGetCookie(lfTokenCookie));
                         } catch (e) {
-                            console.log("Error attempting to login with ", lfTokenCookie, " cookie value: ", $jl.cookie(lfTokenCookie), " ", e);
+                            console.log("Error attempting to login with ", lfTokenCookie, " cookie value: ", lfGetCookie(lfTokenCookie), " ", e);
                         }
                     }
                 }

@@ -32,7 +32,7 @@ class Livefyre_User {
             array(
                 "token" => $this->token( $max_age ),
                 "profile" => array(
-                    "display_name" => $this->display_name
+                    "display_name" => $this->get_display_name()
                 )
             )
         );

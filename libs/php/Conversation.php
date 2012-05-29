@@ -83,10 +83,6 @@ class Livefyre_Conversation {
             </script>';
     }
     
-    public function to_initjs_v2( $user = null, $display_name = null, $backplane = false,  $el = false, $engage_app_name = null ) {
-         return $this->to_initjs_v3( $el, $backplane );
-    }
-    
     public function collection_meta() {
         $article = $this->article;
         $site = $article->get_site();

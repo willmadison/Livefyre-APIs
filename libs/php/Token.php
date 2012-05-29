@@ -11,8 +11,9 @@ class Livefyre_Token {
             'user_id' => $user->get_uid(),
             'expires' => time() + $max_age
         );
-        if (!empty($user->display_name)) {
-            $args['display_name'] = $user->display_name;
+        $dname = $user->get_display_name();
+        if (!empty($dname)) {
+            $args['display_name'] = $dname;
         }
         return JWT::encode($args, $secret);
     }
