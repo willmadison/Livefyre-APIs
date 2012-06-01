@@ -24,6 +24,7 @@ class Livefyre_CommentCount
 	 * Constructor
 	 * 
 	 * @param $network: Your network name as a string. E.g. example-network.fyre.co
+	 * @param $siteId: Your site id. E.g. 1234567890
 	 */
 	public function __construct($network, $siteId)
 	{
