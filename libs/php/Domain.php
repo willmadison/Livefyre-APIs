@@ -63,6 +63,11 @@ class Livefyre_Domain {
         $systemuser->push( $data );
     }
     
+    public function set_pull_url( $url_template ) {
+        $request_url = 'http://' . $this->get_host() . '/?pull_profile_url=' . urlencode($url_template) . '&actor_token=' . $this->user('system')->token();
+        return $this->http->request( $request_url );
+    }
+    
     public function set_user_affiliation( $user_id, $type, $scope = 'domain', $target_id = null ) {
         $allowed_types = array( 'admin', 'member', 'none', 'outcast', 'owner' );
         $allowed_scope = array( 'domain', 'site', 'conv' );
