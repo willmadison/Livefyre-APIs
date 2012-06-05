@@ -139,7 +139,7 @@ class Livefyre_Conversation {
         if ( $network_name != LF_DEFAULT_PROFILE_DOMAIN ) {
             $fyre_config = '{"network": "' . $network_name . '"' . $delegate_str . '}';
         }
-        return '<script type="text/javascript">' . $lfsp_delegate .
+        return '<script type="text/javascript">' .
                 'var lf_config = ' . json_encode( array($config) ) . ';' . $add_backplane .
                 'var conv = fyre.conv.load(' . $fyre_config . ', lf_config' . $onload . ');' .
                 '</script>';
