@@ -72,6 +72,21 @@ function lftokenCreateToken($data, $key) {
     return base64_encode(implode(",",array($data,$base64sig)));
 }
 
+function lftokenValidateSystemToken($token, $key, $domain) {
+    // This replaces the below - it uses JWT to verify that the token is valid for user id = 'system'
+    $payload = JWT::decode($token, $key);
+    $required = array('expires','user_id','domain');
+    foreach ($required as $field_name) {
+        if ( !isset($payload->$field_name) ) {
+            return false;
+        }
+    }
+    if ( $domain != $payload->domain || $expires > time() || $payload->user_id != 'system' ) {
+        return false;
+    }
+    return true;
+}
+
 function lftokenValidateServerToken($token, $key) {
     $parts = explode( ',', $token );
     $signature = array_pop( $parts );

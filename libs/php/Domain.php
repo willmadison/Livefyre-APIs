@@ -243,8 +243,13 @@ class Livefyre_Domain {
         return new Livefyre_Site($site_id, $key, $this);
     }
 
+    public function validate_system_token($token) {
+        // This replaces the below - it uses JWT to verify that the token is valid for user id = 'system'
+        return lftokenValidateSystemToken($token, $this->get_key(), $this->get_host());
+    }
+
     public function validate_server_token($token) {
-        return lftokenValidateServerToken($token, $this->key);
+        return lftokenValidateServerToken($token, $this->get_key());
     }
 }
 
