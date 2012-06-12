@@ -81,7 +81,7 @@ function lftokenValidateSystemToken($token, $key, $domain) {
             return false;
         }
     }
-    if ( $domain != $payload->domain || $expires > time() || $payload->user_id != 'system' ) {
+    if ( $domain != $payload->domain || $payload->expires < time() || $payload->user_id != 'system' ) {
         return false;
     }
     return true;
